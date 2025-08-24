@@ -33,6 +33,8 @@ export interface IStoreData{
 export interface ICartData{
   addProduct(product: TProductIdModalCart): void;
   deleteProduct(product: TProductIdModalCart): void;
+  calculateTotalCost(): void;
+  setTotalCost(): void;
   getTotalCost(): number;
   clearCart(): void;
   getCart(): ICart;
