@@ -4,7 +4,7 @@ export interface IProduct {
   description: string;
   image: string;
   category: string;
-  price: number;
+  price: number | null;
 }
 
 export interface IOrder {
@@ -55,7 +55,7 @@ export interface IOrderData {
 }
 
 export type TProductCardMain = Pick<IProduct, 'id' | 'title' | 'image' | 'category' | 'price'>;
-export type TProductIdModalCart = Pick<IProduct, 'id' >;
+export type TProductIdModalCart = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type TProductCardCart = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type TOrderPaymentAddressForm = Pick<IOrder, 'paymentType' | 'address'>;
 export type TOrderEmailTelephoneForm = Pick<IOrder, 'email' | 'telephone'>;
