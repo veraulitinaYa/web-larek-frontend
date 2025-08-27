@@ -15,8 +15,9 @@ export interface IOrder {
 }
 
 export interface IStore{
+  //total?: number;
   products: IProduct[]; 
-  previewSelectedProductId: string | null;
+  previewSelectedProductId?: string | null;
 }
 
 export interface ICart {
@@ -60,3 +61,11 @@ export type TProductCardCart = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type TOrderPaymentAddressForm = Pick<IOrder, 'paymentType' | 'address'>;
 export type TOrderEmailTelephoneForm = Pick<IOrder, 'email' | 'telephone'>;
 export type TFinalizeOrderModal = Pick<ICart, 'totalCost'>; 
+export type TAllDataFromFroms = TOrderPaymentAddressForm & TOrderEmailTelephoneForm;
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export interface IApi {
+  baseUrl: string;
+  get<T>(uri: string): Promise<T>;
+  post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}

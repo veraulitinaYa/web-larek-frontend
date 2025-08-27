@@ -3,8 +3,16 @@ import './scss/styles.scss';
 import { CartData } from './components/CartData';
 import { OrderData } from './components/OrderData';
 import { StoreData } from './components/StoreData';
-import { IProduct } from './types';
+import { IApi, IProduct, IStore, IOrder, ICart, TOrderEmailTelephoneForm, TOrderPaymentAddressForm } from './types';
 import { ProductData } from './components/ProductData';
+import { Api } from './components/base/api';
+import { API_URL, settings } from './utils/constants';
+import { LarekApi } from './components/LarekApi';
+
+
+
+
+
 
 const product: IProduct = 
     
@@ -41,32 +49,99 @@ const product3: IProduct = {
 };
 
 
-const someProducts = [product, product2];
+// const someProducts = [product, product2];
 
-const events: IEvents = new EventEmitter();
-
-
-const catalog = document.querySelector('.catalog');
-const cartContainer = document.querySelector('.cart');
-const orderContainer = document.querySelector('.order');
-
-// достать карточки с сервера
-// отображить массив в контейнере
-
-console.log(someProducts.includes(product3));
-
-const store = new StoreData(events, someProducts);
-console.log(store.getCatalog());
-
-const order = new OrderData(events);
-order.setAddress('abc');
-console.log(order.getAddress());
+// const events: IEvents = new EventEmitter();
 
 
-const cart = new CartData(events);
-cart.addProduct(product);
-cart.addProduct(product2);
-cart.addProduct(product3);
-console.log(cart.getCart());
+// const catalog = document.querySelector('.catalog');
+// const cartContainer = document.querySelector('.cart');
+// const orderContainer = document.querySelector('.order');
+
+// // достать карточки с сервера
+// // отображить массив в контейнере
+
+// console.log(someProducts.includes(product3));
+
+// const store = new StoreData(events, someProducts);
+// console.log(store.getCatalog());
+
+// const order = new OrderData(events);
+// order.setAddress('abc');
+// console.log(order.getAddress());
 
 
+// const cart = new CartData(events);
+// cart.addProduct(product);
+// cart.addProduct(product2);
+// cart.addProduct(product3);
+// console.log(cart.getCart());
+
+
+const baseApi: IApi = new Api(API_URL, settings);
+const larekApi = new LarekApi(baseApi);
+
+//test1
+larekApi.getProducts().then(console.log);
+
+
+
+//test2
+async function loadSecondProduct() {
+  const store: IStore = await larekApi.getProducts();
+
+  console.log("Второй продукт:", store.products[1]);
+}
+
+loadSecondProduct();
+
+//getproductbyid
+async function loadSecondProductById() {
+  const store: IStore = await larekApi.getProducts();
+
+  if (!store.products[1]) {
+    console.error("В массиве нет второго продукта");
+    return;
+  }
+  const secondProductId = store.products[1].id;
+  const product = await larekApi.getProductById(secondProductId);
+  console.log("Второй продукт по id:", product);
+}
+
+loadSecondProductById();
+
+//order confirmation
+// larekApi.createOrderConfirmation()
+//   .then((res) => {
+//     console.log('Заказ подтверждён:', res.id, 'Сумма:', res.total);
+//   })
+//   .catch((err) => {
+//     console.error('Ошибка при создании заказа:', err);
+//   });
+
+
+const paymentAddress: TOrderPaymentAddressForm = {
+  paymentType: 'online',
+  address: 'Spb Vosstania 1'
+};
+
+const contact: TOrderEmailTelephoneForm = {
+  email: 'test@test.ru',
+  telephone: '+71234567890'
+};
+
+const cart: ICart = {
+  products: [
+    { id: '854cef69-976d-4c2a-a18c-2aa45046c390', title: 'Товар 1', price: 1200 },
+    { id: 'c101ab44-ed99-4a54-990d-47aa2bb4e7d9', title: 'Товар 2', price: 1000 }
+  ],
+  totalCost: 2200
+};
+
+larekApi.submitOrder(paymentAddress, contact, cart)
+  .then(res => {
+    console.log('Заказ подтверждён:', res.id, 'Сумма:', res.total);
+  })
+  .catch(err => {
+    console.error('Ошибка при оформлении заказа:', err);
+  });

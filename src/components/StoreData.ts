@@ -4,6 +4,7 @@ import {IProduct, IStore, IStoreData} from '../types';
 
 
 export class StoreData implements IStore, IStoreData {
+    public total: number = 0;
     public products: IProduct[];
     public previewSelectedProductId: string | null = null;
     private events: IEvents;
@@ -11,6 +12,7 @@ export class StoreData implements IStore, IStoreData {
     constructor(events: IEvents, products: IProduct[]) {
         this.events = events;
         this.products = products;
+
     }
 
     getCatalog(): IProduct[] {
