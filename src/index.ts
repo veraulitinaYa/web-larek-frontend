@@ -3,7 +3,8 @@ import './scss/styles.scss';
 import { CartData } from './components/CartData';
 import { OrderData } from './components/OrderData';
 import { StoreData } from './components/StoreData';
-import { IApi, IProduct, IStore, IOrder, ICart, TOrderEmailTelephoneForm, TOrderPaymentAddressForm } from './types';
+import { ProductCard } from './components/Card';
+import { IApi, IProduct, IStore, IOrder, ICart, TOrderEmailTelephoneForm, TOrderPaymentAddressForm, TProductIdModalCart, TProductCardMain, TProductCardDescription } from './types';
 import { ProductData } from './components/ProductData';
 import { Api } from './components/base/api';
 import { API_URL, settings } from './utils/constants';
@@ -49,7 +50,7 @@ const product3: IProduct = {
 };
 
 
-// const someProducts = [product, product2];
+const someProducts = [product, product2];
 
 // const events: IEvents = new EventEmitter();
 
@@ -81,12 +82,12 @@ const product3: IProduct = {
 const baseApi: IApi = new Api(API_URL, settings);
 const larekApi = new LarekApi(baseApi);
 
-//test1
+//test1 модели
 larekApi.getProducts().then(console.log);
 
 
 
-//test2
+//test2 модели
 async function loadSecondProduct() {
   const store: IStore = await larekApi.getProducts();
 
@@ -95,7 +96,7 @@ async function loadSecondProduct() {
 
 loadSecondProduct();
 
-//getproductbyid
+//getproductbyid модели
 async function loadSecondProductById() {
   const store: IStore = await larekApi.getProducts();
 
@@ -110,16 +111,7 @@ async function loadSecondProductById() {
 
 loadSecondProductById();
 
-//order confirmation
-// larekApi.createOrderConfirmation()
-//   .then((res) => {
-//     console.log('Заказ подтверждён:', res.id, 'Сумма:', res.total);
-//   })
-//   .catch((err) => {
-//     console.error('Ошибка при создании заказа:', err);
-//   });
-
-
+//тестирование API
 const paymentAddress: TOrderPaymentAddressForm = {
   paymentType: 'online',
   address: 'Spb Vosstania 1'
@@ -145,3 +137,97 @@ larekApi.submitOrder(paymentAddress, contact, cart)
   .catch(err => {
     console.error('Ошибка при оформлении заказа:', err);
   });
+
+
+  //
+//   // Допустим, у нас есть массив продуктов
+// const catalogProducts: TProductCardMain[] = [
+//   { id: '1', title: 'Товар 1', image: 'img1.jpg', category: 'софт-скил', price: 750 },
+//   { id: '2', title: 'Товар 2', image: 'img2.jpg', category: 'другое', price: 1200 }
+// ];
+
+// const previewProduct: TProductCardDescription = {
+//   id: '2',
+//   title: 'Товар 2',
+//   description: 'Описание товара для превью',
+//   image: 'img2.jpg',
+//   category: 'другое',
+//   price: 1200
+// };
+
+// const basketProducts: TProductIdModalCart[] = [
+//   { id: '1', title: 'Товар 1', price: 750 },
+//   { id: '2', title: 'Товар 2', price: 1200 }
+// ];
+
+// // Объект событий
+// const events: IEvents = {
+//   emit: (event: string, data?: any) => console.log('Событие:', event, data)
+// };
+
+// // ======= Каталог =======
+// const catalogContainer = document.querySelector('.catalog-container');
+
+// catalogProducts.forEach(productData => {
+//   const template = document.getElementById('card-catalog') as HTMLTemplateElement;
+//   const card = new ProductCard(template, 'catalog', events);
+//   card.setData(productData);
+//   catalogContainer.appendChild(card.render());
+// });
+
+// // ======= Превью =======
+// const previewContainer = document.querySelector('.preview-container');
+// const previewTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
+// const previewCard = new ProductCard(previewTemplate, 'preview', events);
+// previewCard.setData(previewProduct);
+// previewContainer.appendChild(previewCard.render());
+
+// // ======= Корзина =======
+// const basketContainer = document.querySelector('.basket-container');
+
+// basketProducts.forEach((productData, index) => {
+//   const template = document.getElementById('card-basket') as HTMLTemplateElement;
+//   const card = new ProductCard(template, 'basket', events);
+//   card.setData(productData, index);
+//   basketContainer.appendChild(card.render());
+// });
+
+
+
+//const testButton = document.getElementById('test-card') as HTMLElement;
+// if (testButton) {
+//   testButton.addEventListener('click', () => {
+//     testSection.classList.toggle('active');
+//   });
+// }
+const testSection = document.querySelector('.gallery');
+const events: IEvents = new EventEmitter();
+const cardTemplate = document.getElementById('card-basket') as HTMLTemplateElement;
+
+const card = new ProductCard(cardTemplate, 'basket', events);
+card.setData(someProducts[1], 0);
+
+testSection.appendChild(card.render());
+
+
+
+//
+// events.on('product:select', (card) => {
+//   console.log('Открыть превью для:', card.id);
+
+//   // создаём карточку-превью
+//   const previewTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
+//   const previewCard = new ProductCard(previewTemplate, 'preview', events);
+
+//   previewCard.setData({
+//     id: card.id,
+//     title: 'Тестовый товар',
+//     description: 'Описание товара',
+//     image: 'https://via.placeholder.com/150',
+//     category: 'Категория',
+//     price: 1000
+//   });
+
+//   // допустим, показываем в модалке
+//   document.body.appendChild(previewCard.render());
+// });
