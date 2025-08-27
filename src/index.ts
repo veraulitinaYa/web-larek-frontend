@@ -9,7 +9,7 @@ import { ProductData } from './components/ProductData';
 import { Api } from './components/base/api';
 import { API_URL, settings } from './utils/constants';
 import { LarekApi } from './components/LarekApi';
-
+import { CardsContainer } from './components/Store';
 
 
 
@@ -200,14 +200,7 @@ larekApi.submitOrder(paymentAddress, contact, cart)
 //     testSection.classList.toggle('active');
 //   });
 // }
-const testSection = document.querySelector('.gallery');
-const events: IEvents = new EventEmitter();
-const cardTemplate = document.getElementById('card-basket') as HTMLTemplateElement;
 
-const card = new ProductCard(cardTemplate, 'basket', events);
-card.setData(someProducts[1], 0);
-
-testSection.appendChild(card.render());
 
 
 
@@ -231,3 +224,44 @@ testSection.appendChild(card.render());
 //   // допустим, показываем в модалке
 //   document.body.appendChild(previewCard.render());
 // });
+
+
+
+//=====================
+// ТЕСТ КЛАССА КАРТОЧКА
+//=====================
+
+// const testSection = document.querySelector('.gallery');
+// const events: IEvents = new EventEmitter();
+// const cardTemplate = document.getElementById('card-basket') as HTMLTemplateElement;
+
+// const card = new ProductCard(cardTemplate, 'basket', events);
+// card.setData(someProducts[1], 0);
+
+// testSection.appendChild(card.render());
+
+
+// ------------ Находим контейнер
+const testSection = document.querySelector('.gallery') as HTMLElement;
+
+// ------------- Создаём CardsContainer
+const cardsContainer = new CardsContainer(testSection);
+
+// ------------- Создаём events и шаблон карточки
+const events: IEvents = new EventEmitter();
+const cardTemplate = document.getElementById('card-catalog') as HTMLTemplateElement;
+
+// ----------- Грузим продукты с сервера
+
+
+async function loadCatalog() {
+  const store: IStore = await larekApi.getProducts();
+  const cards = store.products.map(product => {
+    const card = new ProductCard(cardTemplate, 'catalog', events);
+    card.setData(product);
+    return card.render();
+  });
+  cardsContainer.catalog = cards;
+}
+
+loadCatalog();
