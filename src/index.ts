@@ -14,6 +14,7 @@ import { CartView } from './components/CartView';
 import { PaymentDataAddressForm } from './components/PaymentDataAddressForm';
 import { EmailTelephoneForm } from './components/EmailTelephoneForm';
 import { SuccessView } from './components/SuccessView';
+import { Modal } from './components/common/Modal';
 
 
 
@@ -358,4 +359,88 @@ function successFormTest(){
   document.body.appendChild(successView.element);
 } 
 
+//MODAL - окно success
+
+function testSuccessModal() {
+  const events = new EventEmitter();
+
+  const modalTemplate = document.querySelector(".modal") as HTMLElement;
+  const modal = new Modal(modalTemplate, events);
+
+  // клонируем шаблон success
+  const successTemplate = document.getElementById("success") as HTMLTemplateElement;
+  const successNode = successTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  const successView = new SuccessView(successNode, events);
+  successView.totalCost = 9999;
+
+  modal.renderContent(successView);
+
+  // слушаем событие "закрыть"
+  events.on("success:close", () => {
+    modal.close();
+  });
+}
+
+// MODAL - окно корзины
+function testCartModal() {
+  const events = new EventEmitter();
+  const modalTemplate = document.querySelector(".modal") as HTMLElement;
+  const modal = new Modal(modalTemplate, events);
+
+  const basketTemplate = document.getElementById("basket") as HTMLTemplateElement;
+  const basketNode = basketTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  const cartView = new CartView(basketNode, events);
+  cartView.products = [
+    { id: "1", title: "Фреймворк куки судьбы", price: 2500 },
+    { id: "2", title: "Скрипт генератора багов", price: 1500 },
+  ];
+  cartView.totalCost = 4000;
+
+  modal.renderContent(cartView);
+}
+
+// MODAL - PaymentAddressForm
+
+function testPaymentForm() {
+  const events = new EventEmitter();
+
+  const modalTemplate = document.querySelector(".modal") as HTMLElement;
+  const modal = new Modal(modalTemplate, events);
+
+  const orderTemplate = document.getElementById("order") as HTMLTemplateElement;
+  const orderNode = orderTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  const form = new PaymentDataAddressForm(orderNode, events);
+
+  modal.renderContent(form);
+
+  // Подписываемся на событие
+  events.on("order:paymentAddress", (data) => {
+    console.log("✅ форма отправлена:", data);
+    modal.close();
+  });
+}
+
+// MODAL - EmailTelephoneForm
+
+function testContactsForm() {
+  const events = new EventEmitter();
+
+  const modalTemplate = document.querySelector(".modal") as HTMLElement;
+  const modal = new Modal(modalTemplate, events);
+
+  const contactsTemplate = document.getElementById("contacts") as HTMLTemplateElement;
+  const contactsNode = contactsTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  const form = new EmailTelephoneForm(contactsNode, events);
+
+  modal.renderContent(form);
+
+  events.on("order:contacts", (data) => {
+    console.log("📩 контакты отправлены:", data);
+    modal.close();
+  });
+}
 
