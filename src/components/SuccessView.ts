@@ -16,11 +16,16 @@ export class SuccessView extends Component<{ totalCost: number }> {
     this.button = this.container.querySelector(".order-success__close");
 
     this.button.addEventListener("click", () => {
-      this.events.emit("success:close");
+      this.events.emit("order:successful");
     });
   }
+
+ 
 
   set totalCost(cost: number) {
     this.description.textContent = `Списано ${cost} синапсов`;
   }
+
+  
 }
+

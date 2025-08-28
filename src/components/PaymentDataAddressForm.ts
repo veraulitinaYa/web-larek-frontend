@@ -31,7 +31,7 @@ export class PaymentDataAddressForm extends Component<{ paymentType: string; add
     this.container.addEventListener("submit", (e) => {
       e.preventDefault();
       if (this.validate()) {
-        this.events.emit("order:paymentAddress", {
+        this.events.emit("order:paymentAddressEntered", {
           paymentType: this.currentPayment,
           address: this.addressInput.value
         });

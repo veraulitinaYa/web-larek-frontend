@@ -22,7 +22,7 @@ export class EmailTelephoneForm extends Component<{ email: string; phone: string
     this.container.addEventListener("submit", (e) => {
       e.preventDefault();
       if (this.validate()) {
-        this.events.emit("order:contacts", {
+        this.events.emit("order:emailTelephoneEntered", {
           email: this.emailInput.value,
           phone: this.phoneInput.value
         });
