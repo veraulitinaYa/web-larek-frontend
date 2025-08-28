@@ -10,7 +10,10 @@ import { Api } from './components/base/api';
 import { API_URL, settings } from './utils/constants';
 import { LarekApi } from './components/LarekApi';
 import { CardsContainer } from './components/Store';
-
+import { CartView } from './components/CartView';
+import { PaymentDataAddressForm } from './components/PaymentDataAddressForm';
+import { EmailTelephoneForm } from './components/EmailTelephoneForm';
+import { SuccessView } from './components/SuccessView';
 
 
 
@@ -241,27 +244,118 @@ larekApi.submitOrder(paymentAddress, contact, cart)
 // testSection.appendChild(card.render());
 
 
-// ------------ Находим контейнер
+//+++++++++++++++++++++++++++++
+//ЗАГРУЖАЕМ ВЕСЬ КАТАЛОГ
+//++++++++++++++++++++++++++++
+
+
+// const testSection = document.querySelector('.gallery') as HTMLElement;
+// const cardsContainer = new CardsContainer(testSection);
+// const events: IEvents = new EventEmitter();
+// const cardTemplate = document.getElementById('card-catalog') as HTMLTemplateElement;
+
+
+// async function loadCatalog() {
+//   const store: IStore = await larekApi.getProducts();
+//   const cards = store.products.map(product => {
+//     const card = new ProductCard(cardTemplate, 'catalog', events);
+//     card.setData(product);
+//     return card.render();
+//   });
+//   cardsContainer.catalog = cards;
+// }
+
+// loadCatalog();
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//----------- КОРЗИНА РАБОТАЕТ и включает в себя карточки
+
+function testBasket()
+{
 const testSection = document.querySelector('.gallery') as HTMLElement;
-
-// ------------- Создаём CardsContainer
-const cardsContainer = new CardsContainer(testSection);
-
-// ------------- Создаём events и шаблон карточки
 const events: IEvents = new EventEmitter();
-const cardTemplate = document.getElementById('card-catalog') as HTMLTemplateElement;
-
-// ----------- Грузим продукты с сервера
 
 
-async function loadCatalog() {
-  const store: IStore = await larekApi.getProducts();
-  const cards = store.products.map(product => {
-    const card = new ProductCard(cardTemplate, 'catalog', events);
-    card.setData(product);
-    return card.render();
-  });
-  cardsContainer.catalog = cards;
+const basketTemplate = document.getElementById("basket") as HTMLTemplateElement;
+const basketEl = basketTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+const cartView = new CartView(basketEl, events);
+
+cartView.products = [
+  { id: "1", title: "Фреймворк куки судьбы", price: 2500 },
+  { id: "2", title: "+1 час в сутках", price: 750 },
+];
+cartView.totalCost = 3250;
+
+document.body.appendChild(cartView.element);
+
+// Проверим событие кнопки "Оформить"
+events.on("cart:checkout", () => {
+  console.log("Кнопка Оформить нажата — открываем форму оплаты");
+});
+
 }
 
-loadCatalog();
+
+// ФОРМА 1 - Тестирую форму 1 - РАБОАЕТ
+function testForm1(){
+const testSection = document.querySelector('.gallery') as HTMLElement;
+  const events: IEvents = new EventEmitter();
+
+  const formOneTemplate = document.getElementById("order") as HTMLTemplateElement;
+
+  // клонируем содержимое шаблона
+  const formNode = formOneTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  // передаем в компонент уже клон, а не template
+  const paymentAddressForm = new PaymentDataAddressForm(formNode, events);
+
+  document.body.appendChild(paymentAddressForm.element);
+
+
+
+
+}
+
+
+// ФОРМА 2 - Тестирую форму 2 - РАБОТАЕТ
+function testForm2(){
+const testSection = document.querySelector('.gallery') as HTMLElement;
+  const events: IEvents = new EventEmitter();
+
+  const formTwoTemplate = document.getElementById("contacts") as HTMLTemplateElement;
+
+  // клонируем содержимое шаблона
+  const formNode = formTwoTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  // передаем в компонент уже клон, а не template
+  const emailTelephoneForm = new EmailTelephoneForm(formNode, events);
+
+  document.body.appendChild(emailTelephoneForm.element);
+
+
+
+
+}
+
+// ОКНО ПОДТВЕРЖДЕНИЯ тест - РАБОТАЕТ ВСЁ 
+function successFormTest(){
+    const events: IEvents = new EventEmitter();
+
+  const successTemplate = document.getElementById("success") as HTMLTemplateElement;
+  const successNode = successTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+  const successView = new SuccessView(successNode, events);
+
+  successView.totalCost = 1234;
+
+  events.on("success:close", () => {
+    console.log("SuccessView закрылся!");
+    successView.element.remove();
+  });
+
+  document.body.appendChild(successView.element);
+} 
+
+
