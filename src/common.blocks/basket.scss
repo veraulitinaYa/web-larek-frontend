@@ -12,6 +12,13 @@
     flex-grow: 1;
   }
 
+    &__empty {
+    color: white;
+    opacity: 0.3;
+    text-align: left; 
+    list-style: none;  
+  }
+
   &__item {
     border-bottom: 1px solid $primary;
     padding: 1.5rem 0;
