@@ -8,7 +8,7 @@ export interface IProduct {
 }
 
 export interface IOrder {
-  payment: 'card' | 'cash' | ''; // варианты оплаты, расширяем при необходимости
+  payment: 'card' | 'cash' | ''; 
   email: string;
   phone: string;
   address: string;

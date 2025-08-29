@@ -69,7 +69,7 @@ interface IProduct {
   description: string;
   image: string;
   category: string;
-  price: number;
+  price: number | null;
 }
 ```
 
@@ -77,10 +77,12 @@ interface IProduct {
 
 ```
 interface IOrder {
-  paymentType: string;
-  address: string;
+  payment: 'card' | 'cash' | ''; 
   email: string;
-  telephone: string;
+  phone: string;
+  address: string;
+  total: number;
+  items: string[];
 }
 ```
 
@@ -116,7 +118,11 @@ interface IStoreData{
 interface ICartData{
   addProduct(product: TProductIdModalCart): void;
   deleteProduct(product: TProductIdModalCart): void;
+  calculateTotalCost(): void;
+  setTotalCost(): void;
   getTotalCost(): number;
+  clearCart(): void;
+  getCart(): ICart;
 }
 ```
 
@@ -124,12 +130,21 @@ interface ICartData{
 
 ```
 interface IOrderData {
-  choosePaymentType(paymentType: string): void;
+  getPaymentType(payment: string): void;
+  setPaymentType(payment: string): void;
   getAddress(): string;
+  setAddress(address: string): void;
   getEmail(): string;
+  setEmail(email: string): void;
   getTelephone(): string;
+  setTelephone(telephone: string): void;
+  getItems(): string[];
+  setItems(items: string[]): void;
+  getTotal(): number;
+  setTotal(total: number): void;
   clearData(): void;
   validateData(): boolean;
+  getOrder(): IOrder;
 }
 ```
 
@@ -166,6 +181,16 @@ type TOrderEmailTelephoneForm = Pick<IOrder, 'email' | 'telephone'>;
 export type TFinalizeOrderModal = Pick<ICartData, 'totalCost'>;
 ```
 
+<b>Объединенный тип для форм данных: </b>
+```
+type TAllDataFromFroms = TOrderPaymentAddressForm & TOrderEmailTelephoneForm;
+```
+<b>Методы API, используемые для обмена с сервером:</b>
+```
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+```
+
+
 ### Базовый код
 
 #### Класс Api
@@ -195,6 +220,16 @@ export type TFinalizeOrderModal = Pick<ICartData, 'totalCost'>;
 - `onAll(callback: (event: EmitterEvent) => void): void` - подписка на все события.
 - `offAll(): void` - очищает все подписки на события.
 - `trigger<T extends object>(eventName: string, context?: Partial<T>): (data: T) => void` - создание функции, которая при вызове автоматически генерирует событие с определенными настройками
+
+#### Класс Component
+Класс-родитель для визуальных компонентов.
+
+Конструктор:
+- `constructor(protected readonly container: HTMLElement)` - конструктор принимает HTMLElement - контейнер.
+
+Методы:
+- `get element(): HTMLElement` - возвращает HTML-элемент, который является контейнером.
+- `render(data?: Partial<T>): HTMLElement` - отрисовывает HTML-элемент.
 
 ### Слой/модель данных
 #### Класс ProductData
