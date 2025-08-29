@@ -3,7 +3,7 @@ import './scss/styles.scss';
 import { CartData } from './components/CartData';
 import { OrderData } from './components/OrderData';
 import { StoreData } from './components/StoreData';
-import { ProductCard } from './components/Card';
+import { ProductCard } from './components/ProductCard';
 import {
 	IApi,
 	IProduct,
@@ -20,7 +20,7 @@ import { ProductData } from './components/ProductData';
 import { Api } from './components/base/api';
 import { API_URL, settings } from './utils/constants';
 import { LarekApi } from './components/LarekApi';
-import { CardsContainer } from './components/Store';
+import { CardsContainer } from './components/CardsContainer';
 import { CartView } from './components/CartView';
 import { PaymentDataAddressForm } from './components/PaymentDataAddressForm';
 import { EmailTelephoneForm } from './components/EmailTelephoneForm';
@@ -260,3 +260,5 @@ events.on('product:select', ({ card }: { card: ProductCard }) => {
 
 	modal.renderContent(previewCard);
 });
+
+
