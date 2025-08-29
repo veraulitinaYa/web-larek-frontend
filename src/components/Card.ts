@@ -15,6 +15,9 @@ export class ProductCard extends Component<ProductDataType> {
   protected type: CardType;
   protected cardId: string;
 
+  // состояние
+  protected inCart: boolean = false;
+
   // общие элементы
   protected cardTitle: HTMLElement;
   protected cardImage: HTMLImageElement | HTMLDivElement;
@@ -33,7 +36,7 @@ export class ProductCard extends Component<ProductDataType> {
 
   constructor(template: HTMLTemplateElement, type: CardType, events: IEvents) {
     const element = cloneTemplate<HTMLElement>(template);
-    super(element);  // 👈 теперь element хранится в this.container
+    super(element);
 
     this.events = events;
     this.type = type;
@@ -52,37 +55,50 @@ export class ProductCard extends Component<ProductDataType> {
       this.cardPrice = this.container.querySelector('.card__price');
       this.cardDescription = this.container.querySelector('.card__text');
       this.addToCartButton = this.container.querySelector('.card__button');
+
       if (this.addToCartButton) {
-        this.addToCartButton.addEventListener('click', () =>
-          this.events.emit('product:add-to-cart', { card: this })
-        );
+        this.addToCartButton.addEventListener('click', () => {
+          if (this.inCart) {
+            this.events.emit('product:remove-from-cart', { id: this.id });
+          } else {
+            this.events.emit('product:add-to-cart', { card: this });
+          }
+        });
+      }
+
+      // следим за обновлением корзины
+this.events.on<{ cart: TProductCardMain[]; totalCost: number }>(
+  'cart:updated',
+  ({ cart }) => {
+    const inCart = cart.some((p: TProductCardMain) => p.id === this.id);
+    this.updateButtonState(inCart);
+  }
+);
+    }
+
+    if (type === 'basket') {
+      this.cardPrice = this.container.querySelector('.card__price');
+      this.basketIndex = this.container.querySelector('.basket__item-index');
+      this.deleteButton = this.container.querySelector('.basket__item-delete');
+
+      if (this.deleteButton) {
+        this.deleteButton.addEventListener('click', () => {
+          this.events.emit('product:remove-from-cart', { id: this.id });
+        });
       }
     }
 
-if (type === 'basket') {
-  this.cardPrice = this.container.querySelector('.card__price');
-  this.basketIndex = this.container.querySelector('.basket__item-index');
-  this.deleteButton = this.container.querySelector('.basket__item-delete'); // ← правильный селектор
-
-  if (this.deleteButton) {
-    this.deleteButton.addEventListener('click', () => {
-      // Всегда эмитим единый формат: { id }
-      this.events.emit('product:remove-from-cart', { id: this.id });
-    });
-  }
-}
-
     if (this.cardImage) {
-      // клик по картинке для всех типов
       this.cardImage.addEventListener('click', () =>
         this.events.emit('product:select', { card: this })
       );
     }
   }
 
-  setData(data: ProductDataType, index?: number) {
-    this.cardId = data.id;
-    this.cardTitle.textContent = data.title;
+setData(data: ProductDataType, index?: number, inCart: boolean = false) {
+  this.cardId = data.id;
+  this.cardTitle.textContent = data.title;
+
 
     if ('image' in data && this.cardImage instanceof HTMLDivElement) {
       this.cardImage.style.backgroundImage = `url(${data.image})`;
@@ -105,7 +121,7 @@ if (type === 'basket') {
 
         if (this.addToCartButton) {
           this.addToCartButton.disabled = false;
-          this.addToCartButton.textContent = 'В корзину';
+          this.updateButtonState(this.inCart);
         }
       }
     }
@@ -116,6 +132,21 @@ if (type === 'basket') {
 
     if (this.basketIndex && typeof index === 'number') {
       this.basketIndex.textContent = String(index + 1);
+    }
+
+      if (this.addToCartButton && data.price != null) {
+    this.updateButtonState(inCart);
+  }
+  }
+
+  protected updateButtonState(inCart: boolean) {
+    this.inCart = inCart;
+    if (this.addToCartButton) {
+      if (inCart) {
+        this.addToCartButton.textContent = 'Удалить из корзины';
+      } else {
+        this.addToCartButton.textContent = 'В корзину';
+      }
     }
   }
 
