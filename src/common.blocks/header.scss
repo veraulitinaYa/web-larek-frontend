@@ -4,6 +4,13 @@
 .header {
   height: $headerHeight;
   background-color: $primary;
+  position: fixed;
+    top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 99;
+ 
+  
 
   &__container {
     @include mixins.container(45px,45px);
