@@ -49,7 +49,7 @@ export class CartView extends Component<ICart> {
     if (products.length === 0) {
       const emptyNode = document.createElement("li");
       emptyNode.className = "basket__empty";
-      emptyNode.textContent = "Корзина пустая";
+      emptyNode.textContent = "Корзина пуста";
       this.list.appendChild(emptyNode);
     }
 
