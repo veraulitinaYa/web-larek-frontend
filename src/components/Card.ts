@@ -91,8 +91,23 @@ if (type === 'basket') {
     if (this.cardCategory && 'category' in data) {
       this.cardCategory.textContent = data.category;
     }
+
     if (this.cardPrice && 'price' in data) {
-      this.cardPrice.textContent = `${data.price} синапсов`;
+      if (data.price == null) {
+        this.cardPrice.textContent = 'Бесценно';
+
+        if (this.addToCartButton) {
+          this.addToCartButton.disabled = true;
+          this.addToCartButton.textContent = 'Недоступно';
+        }
+      } else {
+        this.cardPrice.textContent = `${data.price} синапсов`;
+
+        if (this.addToCartButton) {
+          this.addToCartButton.disabled = false;
+          this.addToCartButton.textContent = 'В корзину';
+        }
+      }
     }
 
     if (this.cardDescription && 'description' in data) {
