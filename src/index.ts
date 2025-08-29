@@ -1,7 +1,6 @@
 import { EventEmitter, IEvents } from './components/base/events';
 import './scss/styles.scss';
 import { CartData } from './components/CartData';
-import { OrderData } from './components/OrderData';
 import { StoreData } from './components/StoreData';
 import { ProductCard } from './components/ProductCard';
 import {
@@ -9,6 +8,7 @@ import {
 	IProduct,
 	IStore,
 	IOrder,
+  IOrderData,
 	ICart,
 	TOrderEmailTelephoneForm,
 	TOrderPaymentAddressForm,
@@ -26,7 +26,7 @@ import { PaymentDataAddressForm } from './components/PaymentDataAddressForm';
 import { EmailTelephoneForm } from './components/EmailTelephoneForm';
 import { SuccessView } from './components/SuccessView';
 import { Modal } from './components/common/Modal';
-
+import { OrderData } from './components/OrderData';
 
 
 
@@ -180,74 +180,6 @@ events.on(
 
 
 //----------------------------------------------------------------------------
-// 7 - оформление заказа
-//----------------------------------------------------------------------------
-
-events.on('cart:checkout', () => {
-	events.emit('order:paymentAddressRequested');
-	const formOneTemplate = document.getElementById(
-		'order'
-	) as HTMLTemplateElement;
-
-	// клонируем содержимое шаблона
-	const formNode = formOneTemplate.content.firstElementChild.cloneNode(
-		true
-	) as HTMLElement;
-
-	// передаем в компонент уже клон, а не template
-	const paymentAddressForm = new PaymentDataAddressForm(formNode, events);
-
-	modal.renderContent(paymentAddressForm);
-});
-
-events.on(
-	'order:paymentAddressEntered',
-	({ paymentType, address }: { paymentType: string; address: string }) => {
-		console.log(paymentType, address);
-
-		const formTwoTemplate = document.getElementById(
-			'contacts'
-		) as HTMLTemplateElement;
-
-		// клонируем содержимое шаблона
-		const formNode = formTwoTemplate.content.firstElementChild.cloneNode(
-			true
-		) as HTMLElement;
-
-		// передаем в компонент уже клон, а не template
-		const emailTelephoneForm = new EmailTelephoneForm(formNode, events);
-		modal.renderContent(emailTelephoneForm);
-	}
-);
-
-events.on(
-	'order:emailTelephoneEntered',
-	({ email, phone }: { email: string; phone: string }) => {
-		console.log(email, phone);
-		const successTemplate = document.getElementById(
-			'success'
-		) as HTMLTemplateElement;
-		const successNode = successTemplate.content.firstElementChild.cloneNode(
-			true
-		) as HTMLElement;
-
-		const successView = new SuccessView(successNode, events);
-
-		successView.totalCost = 1234;
-
-		modal.renderContent(successView);
-	}
-);
-
-events.on('order:successful', () => {
-	console.log('SuccessView закрылся!');
-	modal.close();
-});
-
-
-
-
-//----------------------------------------------------------------------------
 // 8 - process product card click event - 'product:select'
 //----------------------------------------------------------------------------
 
@@ -262,3 +194,120 @@ events.on('product:select', ({ card }: { card: ProductCard }) => {
 });
 
 
+//---------------------------------------------------------------------------
+// 9 - process order
+//----------------------------------------------------------------------------
+
+const orderData: IOrderData = new OrderData(events);
+
+
+events.on('cart:checkout', () => {
+	events.emit('order:paymentAddressRequested');
+
+
+	const formOneTemplate = document.getElementById(
+		'order'
+	) as HTMLTemplateElement;
+
+	// клонируем содержимое шаблона
+	const formNode = formOneTemplate.content.firstElementChild.cloneNode(
+		true
+	) as HTMLElement;
+
+	// передаем в компонент уже клон, а не template
+	const paymentAddressForm = new PaymentDataAddressForm(formNode, events);
+
+
+  orderData.setItems(cart.map(product => product.id));
+    console.log(orderData.getItems());
+
+  const cartItems: string[] = cart.map(p => p.id);
+  orderData.setItems(cartItems);
+
+  orderData.setTotal(cart.reduce((s, i) => s + i.price, 0));
+
+	modal.renderContent(paymentAddressForm);
+});
+
+
+//---------------------------------------------------------------------------
+// 10 - process payment and address (form one)
+//----------------------------------------------------------------------------
+
+events.on(
+  'order:paymentAddressEntered',
+  ({ paymentType, address }: { paymentType: string; address: string }) => {
+
+	events.emit('order:paymentAddressRequested');
+	const formOneTemplate = document.getElementById(
+		'order'
+	) as HTMLTemplateElement;
+
+	// клонируем содержимое шаблона
+	const formNode = formOneTemplate.content.firstElementChild.cloneNode(
+		true
+	) as HTMLElement;
+
+	// передаем в компонент уже клон, а не template
+	const paymentAddressForm = new PaymentDataAddressForm(formNode, events);
+
+    orderData.setPaymentType(paymentType);
+    orderData.setAddress(address);
+
+
+
+    const formTwoTemplate = document.getElementById('contacts') as HTMLTemplateElement;
+    const formNodeTwo = formTwoTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+    const emailTelephoneForm = new EmailTelephoneForm(formNodeTwo, events);
+    modal.renderContent(emailTelephoneForm);
+  }
+);
+
+
+
+//--------------------------------------------------------------------------
+// 11 - process email and telephone (form two)
+//----------------------------------------------------------------------------
+
+
+events.on(
+  'order:emailTelephoneEntered',
+  async ({ email, phone }: { email: string; phone: string }) => {
+    orderData.setEmail(email);
+    orderData.setTelephone(phone);
+
+    try {
+      const response = await larekApi.createOrder(orderData.getOrder());
+      // сервер вернёт { id, total }
+
+      const successTemplate = document.getElementById('success') as HTMLTemplateElement;
+      const successNode = successTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
+
+      const successView = new SuccessView(successNode, events);
+const result = await larekApi.createOrder(orderData.getOrder()) as { id: string; total: number };
+
+successView.totalCost = result.total;
+
+      modal.renderContent(successView);
+      events.emit('order:successful');
+    } catch (err) {
+      console.error('Ошибка при создании заказа', err);
+    }
+  }
+);
+
+//--------------------------------------------------------------------------
+// 12 - process successful order
+//--------------------------------------------------------------------------      
+
+events.on('order:successful', () => {
+const successConfirmButton = document.querySelector('.order-success__close') as HTMLElement;
+successConfirmButton.addEventListener('click', () => {
+	events.emit('order:confirmationAvailable');
+});
+
+events.on('confirmationAvailable', () => {
+	modal.close();
+});
+});

@@ -14,6 +14,10 @@ export class LarekApi {
 
 // получить товары из магазина
 
+  createOrder(order: IOrder) {
+    return this._baseApi.post('/order', order);
+  }
+
 getProducts(): Promise<IStore> {
   return this._baseApi
     .get<ApiListResponse<IProduct>>('/product')
@@ -40,10 +44,10 @@ submitOrder(
 
   //объект для отправки
   const orderToSend = {
-    payment: paymentAddress.paymentType,  
+    payment: paymentAddress.payment,  
     address: paymentAddress.address,
     email: contact.email,
-    phone: contact.telephone,          
+    phone: contact.phone,          
     total: cart.totalCost,
     items: cart.products.map(p => p.id)
   };
