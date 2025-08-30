@@ -1,42 +1,50 @@
-import { IOrderData } from "../types";
+import { IOrder, IOrderData } from "../types";
 
 type TOrderPaymentAddressForm = {
-  paymentType: string;
+  paymentType: 'card' | 'cash' | '';
   address: string;
 };
 
 type TOrderContactsForm = {
   email: string;
-  phone: string; // именно так в форме
+  phone: string; // именно так приходит из формы
 };
 
 export class OrderInfoAggregator implements IOrderData {
   private data: {
-    paymentType?: string;
-    address?: string;
-    email?: string;
-    telephone?: string; // внутри всегда telephone
-  } = {};
+    payment: 'card' | 'cash' | '';
+    address: string;
+    email: string;
+    telephone: string;
+    items: string[];
+    total: number;
+  } = {
+    payment: '',
+    address: '',
+    email: '',
+    telephone: '',
+    items: [],
+    total: 0,
+  };
 
-  // ===== Методы для работы с оплатой и адресом =====
+  // ===== Методы для удобного заполнения =====
   setPaymentData(payload: TOrderPaymentAddressForm) {
-    this.data.paymentType = payload.paymentType;
+    this.data.payment = payload.paymentType;
     this.data.address = payload.address;
   }
 
-  // ===== Методы для работы с email + phone =====
   setContactsData(payload: TOrderContactsForm) {
     this.data.email = payload.email;
     this.data.telephone = payload.phone; // маппим phone → telephone
   }
 
   // ===== Реализация интерфейса IOrderData =====
-  getPaymentType(): string {
-    return this.data.paymentType;
+  getPaymentType(): 'card' | 'cash' | '' {
+    return this.data.payment;
   }
 
-  setPaymentType(paymentType: string): void {
-    this.data.paymentType = paymentType;
+  setPaymentType(payment: 'card' | 'cash' | ''): void {
+    this.data.payment = payment;
   }
 
   getAddress(): string {
@@ -63,15 +71,56 @@ export class OrderInfoAggregator implements IOrderData {
     this.data.telephone = telephone;
   }
 
+  getItems(): string[] {
+    return this.data.items;
+  }
+
+  setItems(items: string[]): void {
+    this.data.items = items;
+  }
+
+  getTotal(): number {
+    return this.data.total;
+  }
+
+  setTotal(total: number): void {
+    this.data.total = total;
+  }
+
   clearData(): void {
-    this.data = {};
+    this.data = {
+      payment: '',
+      address: '',
+      email: '',
+      telephone: '',
+      items: [],
+      total: 0,
+    };
   }
 
   validateData(): boolean {
-    return Boolean(this.data.paymentType && this.data.address && this.data.email && this.data.telephone);
+    return (
+      (this.data.payment === 'card' || this.data.payment === 'cash') &&
+      this.data.address.trim() !== '' &&
+      this.data.email.trim() !== '' &&
+      this.data.telephone.trim() !== '' &&
+      this.data.items.length > 0 &&
+      this.data.total > 0
+    );
   }
 
-  // удобно отдать все данные одной пачкой
+  getOrder(): IOrder {
+    return {
+      payment: this.data.payment,
+      address: this.data.address,
+      email: this.data.email,
+      phone: this.data.telephone,
+      items: this.data.items,
+      total: this.data.total,
+    };
+  }
+
+  // Дополнительно — удобно отдать «сырые» данные
   getData() {
     return this.data;
   }
