@@ -43,6 +43,7 @@ const cartIcon = document.querySelector('.header__basket') as HTMLElement;
 const formOneTemplate = document.getElementById('order') as HTMLTemplateElement;
 const formTwoTemplate = document.getElementById('contacts') as HTMLTemplateElement;
 const successTemplate = document.getElementById('success') as HTMLTemplateElement;
+const cartCounter = cartIcon.querySelector('.header__basket-counter') as HTMLElement;
 
 //----------------------------------------------------------------------------
 // 1 - initialize entities
@@ -308,3 +309,21 @@ events.on('confirmationAvailable', () => {
 	modal.close();
 });
 });
+
+
+//--------------------------------------------------------------------------
+// 13 - cart counter
+//--------------------------------------------------------------------------
+
+
+events.on<{ cart: TProductCardMain[]; totalCost: number }>(
+  'cart:updated',
+  ({ cart, totalCost }) => {
+    // обновляем саму корзину
+    cartView.products = cart;
+    cartView.totalCost = totalCost;
+
+    // обновляем счётчик
+    cartCounter.textContent = String(cart.length);
+  }
+);
