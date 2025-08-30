@@ -301,9 +301,13 @@ successConfirmButton.addEventListener('click', () => {
 	events.emit('order:confirmationAvailable');
 });
 
-events.on('confirmationAvailable', () => {
-	modal.close();
+
 });
+
+events.on('order:confirmationAvailable', () => {
+cart = []; // очищаем логическую корзину ===============================================================================================
+ events.emit('cart:updated', { cart, totalCost: 0 }); // обновляем состояние================================================================
+	modal.close();
 });
 
 
