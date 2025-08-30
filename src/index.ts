@@ -32,13 +32,30 @@ import { OrderData } from './components/OrderData';
 
 
 //----------------------------------------------------------------------------
+// 0 - get entities
+//----------------------------------------------------------------------------
+const testSection = document.querySelector('.gallery') as HTMLElement;
+const previewTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
+const modalContainer = document.querySelector('.modal') as HTMLElement;
+const cardTemplate = document.getElementById('card-catalog') as HTMLTemplateElement;
+const basketTemplate = document.getElementById('basket') as HTMLTemplateElement;
+const cartIcon = document.querySelector('.header__basket') as HTMLElement;
+const formOneTemplate = document.getElementById('order') as HTMLTemplateElement;
+const formTwoTemplate = document.getElementById('contacts') as HTMLTemplateElement;
+const successTemplate = document.getElementById('success') as HTMLTemplateElement;
+
+//----------------------------------------------------------------------------
 // 1 - initialize entities
 //----------------------------------------------------------------------------
-
 const baseApi: IApi = new Api(API_URL, settings);
 const larekApi = new LarekApi(baseApi);
-
 const events = new EventEmitter();
+const modal = new Modal(modalContainer, events);
+const cardsContainer = new CardsContainer(testSection);
+const basketEl = basketTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+const cartView = new CartView(basketEl, events);
+let store: IStore;
+let cart: TProductCardMain[] = []; // логическая корзина
 
 
 
@@ -57,18 +74,8 @@ events.onAll(({ eventName, data }) => {
 //----------------------------------------------------------------------------
 // 3 - load catalog and open-card-preview feature.
 //----------------------------------------------------------------------------
-const testSection = document.querySelector('.gallery') as HTMLElement;
-const previewTemplate = document.getElementById(
-	'card-preview'
-) as HTMLTemplateElement;
-const modalContainer = document.querySelector('.modal') as HTMLElement;
-const modal = new Modal(modalContainer, events);
-const cardsContainer = new CardsContainer(testSection);
 
-const cardTemplate = document.getElementById(
-	'card-catalog'
-) as HTMLTemplateElement;
-let store: IStore;
+
 
 async function loadCatalog() {
 	store = await larekApi.getProducts(); // загружаем каталог
@@ -111,15 +118,7 @@ loadCatalog();
 // 4 - create cart
 //----------------------------------------------------------------------------
 
-let cart: TProductCardMain[] = []; // логическая корзина
 
-// CartView живёт всегда, просто будет обновляться
-const basketTemplate = document.getElementById('basket') as HTMLTemplateElement;
-const basketEl = basketTemplate.content.firstElementChild!.cloneNode(
-	true
-) as HTMLElement;
-
-const cartView = new CartView(basketEl, events);
 
 // добавление товара
 events.on('product:add-to-cart', ({ card }: { card: ProductCard }) => {
@@ -149,7 +148,6 @@ events.on<{ cart: TProductCardMain[]; totalCost: number }>(
 //----------------------------------------------------------------------------
 // 5 - открытие корзины
 //----------------------------------------------------------------------------
-const cartIcon = document.querySelector('.header__basket') as HTMLElement;
 cartIcon.addEventListener('click', () => {
 	events.emit('cart:open');
 });
@@ -205,9 +203,9 @@ events.on('cart:checkout', () => {
 	events.emit('order:paymentAddressRequested');
 
 
-	const formOneTemplate = document.getElementById(
-		'order'
-	) as HTMLTemplateElement;
+	// const formOneTemplate = document.getElementById(
+	// 	'order'
+	// ) as HTMLTemplateElement;
 
 	// клонируем содержимое шаблона
 	const formNode = formOneTemplate.content.firstElementChild.cloneNode(
@@ -239,9 +237,9 @@ events.on(
   ({ paymentType, address }: { paymentType: string; address: string }) => {
 
 	events.emit('order:paymentAddressRequested');
-	const formOneTemplate = document.getElementById(
-		'order'
-	) as HTMLTemplateElement;
+	// const formOneTemplate = document.getElementById(
+	// 	'order'
+	// ) as HTMLTemplateElement;
 
 	// клонируем содержимое шаблона
 	const formNode = formOneTemplate.content.firstElementChild.cloneNode(
@@ -256,7 +254,7 @@ events.on(
 
 
 
-    const formTwoTemplate = document.getElementById('contacts') as HTMLTemplateElement;
+    //const formTwoTemplate = document.getElementById('contacts') as HTMLTemplateElement;
     const formNodeTwo = formTwoTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
 
     const emailTelephoneForm = new EmailTelephoneForm(formNodeTwo, events);
@@ -280,7 +278,7 @@ events.on(
     try {
       // сервер вернёт { id, total }
 
-      const successTemplate = document.getElementById('success') as HTMLTemplateElement;
+      //const successTemplate = document.getElementById('success') as HTMLTemplateElement;
       const successNode = successTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
 
       const successView = new SuccessView(successNode, events);
