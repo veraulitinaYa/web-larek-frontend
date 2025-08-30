@@ -82,6 +82,10 @@ async function loadCatalog() {
   try {
     store = await larekApi.getProducts(); // загружаем каталог
 
+    // store.products.forEach((product) => {
+    //   console.log(product);
+    // })
+
     const cards = store.products.map((product) => {
       const card = new ProductCard(cardTemplate, 'catalog', events);
       card.setData(product);

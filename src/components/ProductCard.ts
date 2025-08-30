@@ -6,6 +6,7 @@ import {
   TProductCardDescription, 
   TProductIdModalCart 
 } from '../types';
+import { CDN_URL } from '../utils/constants';
 
 type CardType = 'catalog' | 'preview' | 'basket';
 type ProductDataType = TProductCardMain | TProductCardDescription | TProductIdModalCart;
@@ -99,9 +100,9 @@ setData(data: ProductDataType, index?: number, inCart: boolean = false) {
   this.cardId = data.id;
   this.cardTitle.textContent = data.title;
 
-
-    if ('image' in data && this.cardImage instanceof HTMLDivElement) {
-      this.cardImage.style.backgroundImage = `url(${data.image})`;
+    if ('image' in data && this.cardImage instanceof HTMLImageElement) {
+      console.log(data.image);
+      this.cardImage.src = `${CDN_URL}${data.image}`;
     }
 
     if (this.cardCategory && 'category' in data) {
