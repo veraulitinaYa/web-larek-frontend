@@ -1,46 +1,30 @@
-import { Component } from "./base/Component";
+import { Form, FormField } from "./Form";
 import { IEvents } from "./base/events";
 
-export class EmailTelephoneForm extends Component<{ email: string; phone: string }> {
-  protected emailInput: HTMLInputElement;
-  protected phoneInput: HTMLInputElement;
-  protected submit: HTMLButtonElement;
-  protected error: HTMLElement;
-  protected events: IEvents;
+export class EmailTelephoneForm extends Form<{ email: string; phone: string }> {
+protected getFields(): Record<string, FormField> {
+  return {
+    email: this.container.querySelector("input[name='email']")! as HTMLInputElement,
+    phone: this.container.querySelector("input[name='phone']")! as HTMLInputElement
+  };
+}
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container);
-    this.events = events;
+  protected validate(): boolean {
+    const email = (this.fields.email as HTMLInputElement).value;
+    const phone = (this.fields.phone as HTMLInputElement).value;
 
-    this.emailInput = this.container.querySelector("input[name='email']");
-    this.phoneInput = this.container.querySelector("input[name='phone']");
-    this.submit = this.container.querySelector("button[type='submit']");
-    this.error = this.container.querySelector(".form__errors");
-
-    this.container.addEventListener("input", () => this.validate());
-
-    this.container.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (this.validate()) {
-        this.events.emit("order:emailTelephoneEntered", {
-          email: this.emailInput.value,
-          phone: this.phoneInput.value
-        });
-      }
-    });
-  }
-
-  private validate(): boolean {
-    const emailValid = this.emailInput.value.includes("@");
-    const phoneValid = this.phoneInput.value.length >= 7;
-
-    if (!emailValid || !phoneValid) {
-      this.submit.disabled = true;
-      this.error.textContent = "Введите корректные данные";
+    if (!email.includes("@") || phone.length < 7) {
+      this.showError("Введите корректные данные");
       return false;
     }
-    this.submit.disabled = false;
-    this.error.textContent = "";
+    this.clearError();
     return true;
+  }
+
+  protected onSubmit() {
+    const email = (this.fields.email as HTMLInputElement).value;
+    const phone = (this.fields.phone as HTMLInputElement).value;
+
+    this.events.emit("order:emailTelephoneEntered", { email, phone });
   }
 }
