@@ -270,25 +270,21 @@ events.on(
 //----------------------------------------------------------------------------
 
 
-events.on(
+events.on<{ email: string; phone: string }>(
   'order:emailTelephoneEntered',
-  async ({ email, phone }: { email: string; phone: string }) => {
+  async ({ email, phone }) => {
     orderData.setEmail(email);
     orderData.setTelephone(phone);
 
     try {
-      // сервер вернёт { id, total }
+      const result = await larekApi.createOrder(orderData.getOrder()) as { id: string; total: number };
 
-      //const successTemplate = document.getElementById('success') as HTMLTemplateElement;
       const successNode = successTemplate.content.firstElementChild.cloneNode(true) as HTMLElement;
-
       const successView = new SuccessView(successNode, events);
-const result = await larekApi.createOrder(orderData.getOrder()) as { id: string; total: number };
+      successView.totalCost = result.total;
 
-successView.totalCost = result.total;
-
-      modal.renderContent(successView);
-      events.emit('order:successful');
+      modal.renderContent(successView); // без .render()
+      modal.open();
     } catch (err) {
       console.error('Ошибка при создании заказа', err);
     }
