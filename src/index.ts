@@ -79,33 +79,28 @@ events.onAll(({ eventName, data }) => {
 
 
 async function loadCatalog() {
-	store = await larekApi.getProducts(); // загружаем каталог
+  try {
+    store = await larekApi.getProducts(); // загружаем каталог
 
-	// создаём карточки каталога
+    const cards = store.products.map((product) => {
+      const card = new ProductCard(cardTemplate, 'catalog', events);
+      card.setData(product);
 
-	const cards = store.products.map((product) => {
-		const card = new ProductCard(cardTemplate, 'catalog', events);
-		card.setData(product);
+      card.element.addEventListener('click', () => {
+        const previewCard = new ProductCard(previewTemplate, 'preview', events);
+        const inCart = cart.some((p) => p.id === product.id);
+        previewCard.setData(product, undefined, inCart);
+        modal.renderContent(previewCard);
+      });
 
-		// подписка на клик по карточке для открытия превью
-		card.element.addEventListener('click', () => {
-			const previewCard = new ProductCard(previewTemplate, 'preview', events);
+      return card.render();
+    });
 
-			const inCart = cart.some((p) => p.id === product.id);
-
-			previewCard.setData(product, undefined, inCart); // передаём данные продукта
-
-			modal.renderContent(previewCard);
-		});
-
-		return card.render();
-	});
-
-	// вставляем карточки на страницу
-	cardsContainer.catalog = cards;
-
-	// эмитим событие о загрузке каталога
-	events.emit('catalog:loaded', { products: store.products });
+    cardsContainer.catalog = cards;
+    events.emit('catalog:loaded', { products: store.products });
+  } catch (err) {
+    console.error('Ошибка при загрузке каталога', err);
+  }
 }
 
 // запускаем
@@ -283,14 +278,13 @@ events.on<{ email: string; phone: string }>(
       const successView = new SuccessView(successNode, events);
       successView.totalCost = result.total;
 
-      modal.renderContent(successView); // без .render()
+      modal.renderContent(successView);
       modal.open();
     } catch (err) {
       console.error('Ошибка при создании заказа', err);
     }
   }
 );
-
 //--------------------------------------------------------------------------
 // 12 - process successful order
 //--------------------------------------------------------------------------      
