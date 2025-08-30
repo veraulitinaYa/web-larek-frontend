@@ -278,7 +278,6 @@ events.on(
     orderData.setTelephone(phone);
 
     try {
-      const response = await larekApi.createOrder(orderData.getOrder());
       // сервер вернёт { id, total }
 
       const successTemplate = document.getElementById('success') as HTMLTemplateElement;
